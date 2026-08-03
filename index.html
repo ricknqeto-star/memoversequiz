@@ -48,7 +48,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 8h8v12H8z" opacity="0.4"/>
       </svg>
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-center">
-        Bible Quiz Scoreboard
+        Prestige College Bible Quiz Scoreboard
       </h1>
     </div>
   </header>
@@ -63,16 +63,30 @@
     </div>
   </section>
 
-  <!-- ========== TIMER (just above the houses) ========== -->
-  <div class="pt-4 pb-1 flex justify-center">
+  <!-- ========== TIMERS (just above the houses) ========== -->
+  <div class="pt-4 pb-1 flex justify-center gap-4 flex-wrap">
+    <!-- 5-second timer -->
+    <button id="timer5-btn"
+            title="Start 5-second timer (then auto-starts 30s)"
+            class="flex items-center gap-3
+                   bg-slate-700 hover:bg-slate-600 active:scale-95
+                   text-sky-300 font-bold px-5 py-3 rounded-2xl
+                   border-2 border-sky-500/60 shadow-lg transition text-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="9" />
+        <path stroke-linecap="round" d="M12 7v5l3 2" />
+      </svg>
+      <span id="timer5-display" class="text-2xl tabular-nums min-w-[2ch] font-mono">5</span>
+    </button>
+
+    <!-- 30-second timer -->
     <button id="timer-btn"
             title="Start 30-second timer"
             class="flex items-center gap-3
                    bg-slate-700 hover:bg-slate-600 active:scale-95
                    text-amber-300 font-bold px-6 py-3 rounded-2xl
                    border-2 border-amber-500/60 shadow-lg transition text-xl">
-      <!-- Clock icon (bigger) -->
-      <svg id="timer-icon" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
         <circle cx="12" cy="12" r="9" />
         <path stroke-linecap="round" d="M12 7v5l3 2" />
       </svg>
@@ -186,13 +200,18 @@
     // Timer elements
     const timerBtn       = document.getElementById('timer-btn');
     const timerDisplay   = document.getElementById('timer-display');
+    const timer5Btn      = document.getElementById('timer5-btn');
+    const timer5Display  = document.getElementById('timer5-display');
 
     /* ============================================================
        TIMER + SOUND
        ============================================================ */
     let timerInterval = null;
+    let timer5Interval = null;
     let remaining = 30;
+    let remaining5 = 5;
     const TIMER_DURATION = 30;
+    const TIMER5_DURATION = 5;
 
     // Create a simple beep using Web Audio API
     function playBeep({ frequency = 880, duration = 0.15, type = 'sine', volume = 0.3 } = {}) {
@@ -234,6 +253,10 @@
       timerDisplay.textContent = remaining;
     }
 
+    function updateTimer5Display() {
+      timer5Display.textContent = remaining5;
+    }
+
     function stopTimer(reset = true) {
       if (timerInterval) {
         clearInterval(timerInterval);
@@ -247,12 +270,28 @@
       }
     }
 
+    function stopTimer5(reset = true) {
+      if (timer5Interval) {
+        clearInterval(timer5Interval);
+        timer5Interval = null;
+      }
+      timer5Btn.classList.remove('timer-running', 'bg-sky-600', 'text-white', 'border-sky-300');
+      timer5Btn.classList.add('bg-slate-700', 'text-sky-300', 'border-sky-500/60');
+      if (reset) {
+        remaining5 = TIMER5_DURATION;
+        updateTimer5Display();
+      }
+    }
+
     function startTimer() {
       // Cancel if already running
       if (timerInterval) {
         stopTimer(true);
         return;
       }
+
+      // Stop the 5s timer if it is running
+      stopTimer5(true);
 
       remaining = TIMER_DURATION;
       updateTimerDisplay();
@@ -278,7 +317,44 @@
       }, 1000);
     }
 
+    function startTimer5() {
+      // Cancel if already running
+      if (timer5Interval) {
+        stopTimer5(true);
+        return;
+      }
+
+      // Stop the 30s timer if it is running
+      stopTimer(true);
+
+      remaining5 = TIMER5_DURATION;
+      updateTimer5Display();
+      playStartSound();
+
+      timer5Btn.classList.add('timer-running', 'bg-sky-600', 'text-white', 'border-sky-300');
+      timer5Btn.classList.remove('bg-slate-700', 'text-sky-300', 'border-sky-500/60');
+
+      timer5Interval = setInterval(() => {
+        remaining5--;
+        updateTimer5Display();
+
+        if (remaining5 <= 0) {
+          stopTimer5(false);
+          playTimeoutSound();
+          // Flash the display briefly, then auto-start the 30s timer
+          timer5Display.textContent = '0';
+          setTimeout(() => {
+            remaining5 = TIMER5_DURATION;
+            updateTimer5Display();
+            // Automatically start the 30-second timer
+            startTimer();
+          }, 600);
+        }
+      }, 1000);
+    }
+
     timerBtn.addEventListener('click', startTimer);
+    timer5Btn.addEventListener('click', startTimer5);
 
     /* ============================================================
        RENDER TOGGLES
@@ -383,7 +459,8 @@
        UPDATE SCORE + ANIMATION
        ============================================================ */
     function updateScore(houseId, delta) {
-      state.scores[houseId] = Math.max(0, state.scores[houseId] + delta); // never go below 0
+      // Allow negative scores
+      state.scores[houseId] = state.scores[houseId] + delta;
       const el = document.getElementById(`score-${houseId}`);
       if (el) {
         el.textContent = state.scores[houseId];
