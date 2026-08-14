@@ -1,0 +1,137 @@
+/* Digital score font */
+.digital-score {
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 8px rgba(0,0,0,0.35);
+  transition: transform 0.15s ease, color 0.2s ease;
+  line-height: 1;
+}
+
+.score-pop {
+  animation: scorePop 0.3s ease;
+}
+
+@keyframes scorePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+}
+
+/* Timer pulse */
+.timer-running {
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55); }
+  50%      { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+}
+
+/* ========== Team Logo - Far Left (wider) ========== */
+.team-logo {
+  max-width: 170px;      /* was 70px – now much wider */
+  height: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ========== Answer options - more compact ========== */
+.answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem 0.7rem;
+  margin-top: 0.2rem;
+}
+
+.answer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.5rem;
+}
+
+.answer-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  min-width: 2rem;
+}
+
+.answer-btns {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.btn-correct,
+.btn-incorrect {
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.4rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-correct {
+  background: #16a34a;
+  color: white;
+}
+.btn-correct:hover { background: #15803d; }
+.btn-correct:active { transform: scale(0.95); }
+
+.btn-incorrect {
+  background: #dc2626;
+  color: white;
+}
+.btn-incorrect:hover { background: #b91c1c; }
+.btn-incorrect:active { transform: scale(0.95); }
+
+.tb-btn {
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.4rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tb-btn:hover { background: #4338ca; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .team-logo {
+    max-width: 100px;    /* was 55px */
+  }
+
+  .answer-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .answer-btns {
+    width: 100%;
+  }
+
+  .btn-correct,
+  .btn-incorrect {
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+}
